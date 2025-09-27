@@ -13,6 +13,11 @@ apply plugin: 'com.android.application'
 android {
     compileSdk 33
     namespace 'com.clean.game'
+sourceSets {
+     main {
+         manifest.srcFile 'AndroidManifest.xml'  // 使用根目录的manifest
+          res.srcDirs = ['res']                   // 使用根目录的res文件夹
+          java.srcDirs = ['src/main/java']        // java文件位置
     
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -35,3 +40,4 @@ android {
 }
 
 // 不添加任何依赖
+

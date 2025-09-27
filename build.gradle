@@ -1,6 +1,14 @@
-plugins {
-    id 'com.android.application'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
 }
+
+apply plugin: 'com.android.application'
 
 android {
     compileSdk 33
@@ -27,5 +35,9 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
+}
 
+repositories {
+    google()
+    mavenCentral()
 }

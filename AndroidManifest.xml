@@ -4,13 +4,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/icon"
-        android:label="我的游戏"
-        android:theme="@style/AppTheme">
-        
+        android:label="My Game">
         <activity
-            android:name="com.clean.game.MainActivity"
-            android:screenOrientation="landscape"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,4 +14,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

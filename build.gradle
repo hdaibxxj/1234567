@@ -12,7 +12,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 33
-    namespace 'com.clean.game'  // ← 关键修复
+    namespace 'com.clean.game'
     
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -34,11 +34,4 @@ android {
     }
 }
 
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-}
-
-repositories {
-    google()
-    mavenCentral()
-}
+// 不添加任何依赖

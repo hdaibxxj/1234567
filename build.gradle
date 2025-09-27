@@ -1,23 +1,18 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
-    }
+plugins {
+    id 'com.android.application'
 }
-
-apply plugin: 'com.android.application'
 
 android {
     compileSdk 33
     namespace 'com.clean.game'
-sourceSets {
-     main {
-         manifest.srcFile 'AndroidManifest.xml'  // 使用根目录的manifest
-          res.srcDirs = ['res']                   // 使用根目录的res文件夹
-          java.srcDirs = ['src/main/java']        // java文件位置
+    
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            res.srcDirs = ['res']
+            java.srcDirs = ['src/main/java']
+        }
+    }
     
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -35,9 +30,11 @@ sourceSets {
     buildTypes {
         release {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
 
-// 不添加任何依赖
-
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}

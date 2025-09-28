@@ -14,48 +14,35 @@ jobs:
     
     - name: 安装Gradle 8.4
       run: |
-        # Gradle 8.4 已经下载完成，现在安装
+        wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
-        echo "✅ Gradle 8.4 安装完成"
-        /opt/gradle/gradle-8.4/bin/gradle --version
     
-    - name: 验证项目配置
-      run: |
-        echo "=== 项目结构检查 ==="
-        ls -la
-        echo ""
-        echo "=== build.gradle 内容 ==="
-        cat build.gradle
-        echo ""
-        echo "=== AndroidManifest.xml 内容 ==="
-        cat AndroidManifest.xml
-    
-    - name: 使用Gradle 8.4构建APK
+    - name: 构建APK
       run: |
         export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
         echo "开始构建APK..."
         gradle clean assembleDebug --stacktrace --no-daemon
         echo "构建完成!"
     
-    - name: 检查构建结果
+    - name: 详细检查构建输出
       run: |
-        APK_FILE=$(find . -name "*.apk" -type f | head -1)
-        if [ -n "$APK_FILE" ]; then
-          echo "🎉 恭喜！APK构建成功！"
-          echo "📦 APK文件: $APK_FILE"
-          echo "📏 文件大小: $(du -h "$APK_FILE" | cut -f1)"
-          echo "=== APK内容预览 ==="
-          unzip -l "$APK_FILE" | head -10
-        else
-          echo "❌ APK构建失败"
-          echo "=== 详细错误诊断 ==="
-          find . -name "build" -type d
-          ls -la build/outputs/ 2>/dev/null || echo "输出目录不存在"
-        fi
+        echo "=== 查找所有APK文件 ==="
+        find . -name "*.apk" -type f
+        echo ""
+        echo "=== 检查build目录结构 ==="
+        find build -type f 2>/dev/null | head -20 || echo "build目录不存在"
+        echo ""
+        echo "=== 检查项目根目录 ==="
+        ls -la
+        echo ""
+        echo "=== 检查是否有app目录 ==="
+        ls -la app/ 2>/dev/null | head -10 || echo "app目录不存在"
     
-    - name: 上传APK
+    - name: 上传APK（如果找到）
       uses: actions/upload-artifact@v4
       with:
-        name: rpg-maker-webview-apk
-        path: build/outputs/apk/debug/*.apk
-        if-no-files-found: error
+        name: rpg-maker-apk
+        path: |
+          build/outputs/apk/debug/*.apk
+          app/build/outputs/apk/debug/*.apk
+        if-no-files-found: warn

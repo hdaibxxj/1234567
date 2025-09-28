@@ -12,45 +12,50 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
-    - name: 删除settings.gradle避免冲突
+    - name: 安装Gradle 8.4
       run: |
-        # 确保删除settings.gradle
-        rm -f settings.gradle
-        echo "✅ 已删除settings.gradle"
-        
-        # 检查项目结构
-        echo "=== 项目文件 ==="
+        # Gradle 8.4 已经下载完成，现在安装
+        sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
+        echo "✅ Gradle 8.4 安装完成"
+        /opt/gradle/gradle-8.4/bin/gradle --version
+    
+    - name: 验证项目配置
+      run: |
+        echo "=== 项目结构检查 ==="
         ls -la
         echo ""
-        echo "=== build.gradle内容 ==="
+        echo "=== build.gradle 内容 ==="
         cat build.gradle
+        echo ""
+        echo "=== AndroidManifest.xml 内容 ==="
+        cat AndroidManifest.xml
     
-    - name: 给gradlew执行权限
-      run: chmod +x ./gradlew
-    
-    - name: 使用Gradle Wrapper构建
+    - name: 使用Gradle 8.4构建APK
       run: |
-        echo "使用Gradle Wrapper构建..."
-        ./gradlew clean assembleDebug --stacktrace --no-daemon
+        export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
+        echo "开始构建APK..."
+        gradle clean assembleDebug --stacktrace --no-daemon
+        echo "构建完成!"
     
     - name: 检查构建结果
       run: |
-        echo "=== 查找APK文件 ==="
-        find . -name "*.apk" -type f
-        echo ""
         APK_FILE=$(find . -name "*.apk" -type f | head -1)
         if [ -n "$APK_FILE" ]; then
-          echo "✅ APK构建成功: $APK_FILE"
-          echo "📦 文件大小: $(du -h "$APK_FILE" | cut -f1)"
+          echo "🎉 恭喜！APK构建成功！"
+          echo "📦 APK文件: $APK_FILE"
+          echo "📏 文件大小: $(du -h "$APK_FILE" | cut -f1)"
+          echo "=== APK内容预览 ==="
+          unzip -l "$APK_FILE" | head -10
         else
           echo "❌ APK构建失败"
-          echo "=== 检查build目录 ==="
+          echo "=== 详细错误诊断 ==="
           find . -name "build" -type d
+          ls -la build/outputs/ 2>/dev/null || echo "输出目录不存在"
         fi
     
     - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
-        name: rpg-maker-final-apk
+        name: rpg-maker-webview-apk
         path: build/outputs/apk/debug/*.apk
-        if-no-files-found: warn
+        if-no-files-found: error

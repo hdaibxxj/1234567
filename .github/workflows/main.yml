@@ -9,13 +9,16 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - uses: android-actions/setup-android@v2
+    - name: 设置Android SDK
+      uses: android-actions/setup-android@v2
+    - name: 给gradlew权限
+      run: chmod +x ./gradlew
     - name: 构建APK
-      run: |
-        chmod +x ./gradlew
-        ./gradlew assembleDebug
+      run: ./gradlew clean assembleDebug --no-daemon --stacktrace
+    - name: 查找生成的APK
+      run: find . -name "*.apk"
     - name: 上传APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: app
+        name: android-app
         path: build/outputs/apk/debug/*.apk

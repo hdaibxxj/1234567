@@ -17,18 +17,13 @@ jobs:
         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
     
-    - name: 验证项目结构
+    - name: 验证配置
       run: |
-        echo "=== 项目文件检查 ==="
-        ls -la
+        echo "=== 检查settings.gradle ==="
+        cat settings.gradle || echo "settings.gradle不存在"
         echo ""
-        echo "=== Java文件检查 ==="
-        find src -name "*.java" -type f
-        echo ""
-        echo "=== 配置文件检查 ==="
+        echo "=== 检查build.gradle ==="
         cat build.gradle || echo "build.gradle不存在"
-        echo "---"
-        cat AndroidManifest.xml || echo "AndroidManifest.xml不存在"
     
     - name: 构建APK
       run: |
@@ -39,18 +34,15 @@ jobs:
     
     - name: 检查构建结果
       run: |
-        echo "=== 查找APK文件 ==="
-        find . -name "*.apk" -type f
-        echo ""
-        echo "=== 检查build目录 ==="
-        ls -la build/outputs/apk/debug/ || echo "APK目录不存在"
-        echo ""
         APK_FILE=$(find . -name "*.apk" -type f | head -1)
         if [ -n "$APK_FILE" ]; then
           echo "✅ APK构建成功: $APK_FILE"
           echo "📦 文件大小: $(du -h "$APK_FILE" | cut -f1)"
+          echo "=== APK内容检查 ==="
+          unzip -l "$APK_FILE" | grep -E "(AndroidManifest|classes.dex|MainActivity)" | head -5
         else
           echo "❌ APK构建失败"
+          find . -name "build" -type d
         fi
     
     - name: 上传APK

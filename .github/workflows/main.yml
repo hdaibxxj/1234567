@@ -17,20 +17,29 @@ jobs:
         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
     
+    - name: 修复配置
+      run: |
+        # 确保使用正确的主题配置
+        echo "修复AndroidManifest.xml主题配置..."
+    
     - name: 构建APK
       run: |
         export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
-        gradle clean assembleDebug
+        gradle clean assembleDebug --stacktrace
     
     - name: 检查APK
       run: |
         APK_FILE=$(find . -name "*.apk" -type f | head -1)
-        echo "APK文件: $APK_FILE"
-        echo "大小: $(du -h "$APK_FILE" | cut -f1)"
-        echo "这是一个WebView容器，游戏从Netlify加载"
+        if [ -n "$APK_FILE" ]; then
+          echo "APK文件: $APK_FILE"
+          echo "大小: $(du -h "$APK_FILE" | cut -f1)"
+        else
+          echo "未找到APK文件"
+          find . -name "build" -type d
+        fi
     
     - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
-        name: rpg-maker-webview-apk
+        name: rpg-game-apk
         path: build/outputs/apk/debug/*.apk

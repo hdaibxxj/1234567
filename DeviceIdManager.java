@@ -1,3 +1,5 @@
+package com.xycsjj.peamcc; // 请替换为您的实际包名
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
@@ -12,7 +14,7 @@ public class DeviceIdManager {
             Settings.Secure.ANDROID_ID
         );
         
-        // 检查是否是无效的Android ID
+        // 检查是否是无效的Android ID（某些设备会返回固定的无效值）
         if (androidId != null && !androidId.equals("9774d56d682e549c")) {
             return "device_" + androidId;
         }

@@ -7,8 +7,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="触手监禁1.0XY版"
-        android:theme="@android:style/Theme.Holo.Light">  <!-- 使用系统主题 -->
+        android:label="触手监禁1.0XY版">
         
         <activity
             android:name=".MainActivity"

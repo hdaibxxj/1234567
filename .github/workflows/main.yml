@@ -14,43 +14,43 @@ jobs:
     
     - name: 删除settings.gradle避免冲突
       run: |
-        # 删除settings.gradle文件
-        if [ -f "settings.gradle" ]; then
-          rm settings.gradle
-          echo "✅ 已删除settings.gradle文件"
-        else
-          echo "ℹ️ settings.gradle文件不存在，继续构建"
-        fi
+        # 确保删除settings.gradle
+        rm -f settings.gradle
+        echo "✅ 已删除settings.gradle"
         
-        # 验证当前文件结构
-        echo "=== 当前项目文件 ==="
-        ls -la | grep -E "(gradle|build|src)"
+        # 检查项目结构
+        echo "=== 项目文件 ==="
+        ls -la
+        echo ""
+        echo "=== build.gradle内容 ==="
+        cat build.gradle
     
-    - name: 安装Gradle 8.4
-      run: |
-        wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
-        sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
+    - name: 给gradlew执行权限
+      run: chmod +x ./gradlew
     
-    - name: 构建APK
+    - name: 使用Gradle Wrapper构建
       run: |
-        export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
-        echo "开始构建APK..."
-        gradle clean assembleDebug --stacktrace
-        echo "构建完成!"
+        echo "使用Gradle Wrapper构建..."
+        ./gradlew clean assembleDebug --stacktrace --no-daemon
     
     - name: 检查构建结果
       run: |
+        echo "=== 查找APK文件 ==="
+        find . -name "*.apk" -type f
+        echo ""
         APK_FILE=$(find . -name "*.apk" -type f | head -1)
         if [ -n "$APK_FILE" ]; then
           echo "✅ APK构建成功: $APK_FILE"
           echo "📦 文件大小: $(du -h "$APK_FILE" | cut -f1)"
         else
           echo "❌ APK构建失败"
+          echo "=== 检查build目录 ==="
           find . -name "build" -type d
         fi
     
     - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
-        name: rpg-maker-webview-apk
+        name: rpg-maker-final-apk
         path: build/outputs/apk/debug/*.apk
+        if-no-files-found: warn

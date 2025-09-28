@@ -12,8 +12,15 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
-    - name: 使用指定版本的Gradle
+    - name: 安装兼容的Gradle版本
       run: |
-        # 使用与项目兼容的Gradle版本
+        # 安装与Android Gradle Plugin 8.1.0兼容的Gradle版本
+        wget https://services.gradle.org/distributions/gradle-8.4-bin.zip
+        sudo unzip -d /opt/gradle gradle-8.4-bin.zip
+        export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
         gradle --version
-        gradle clean assembleDebug --stacktrace --warning-mode none
+    
+    - name: 使用兼容版本构建
+      run: |
+        export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
+        gradle clean assembleDebug --stacktrace

@@ -12,15 +12,33 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
-    - name: 安装兼容的Gradle版本
+    - name: 安装Gradle 8.4
       run: |
-        # 安装与Android Gradle Plugin 8.1.0兼容的Gradle版本
         wget https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -d /opt/gradle gradle-8.4-bin.zip
-        export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
-        gradle --version
     
-    - name: 使用兼容版本构建
+    - name: 构建APK
       run: |
         export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
-        gradle clean assembleDebug --stacktrace
+        gradle clean assembleDebug --info
+    
+    - name: 🔍 详细检查文件结构
+      run: |
+        echo "=== 当前目录所有文件 ==="
+        ls -la
+        echo ""
+        echo "=== 查找所有apk文件 ==="
+        find . -name "*.apk" -type f
+        echo ""
+        echo "=== 查找build目录 ==="
+        find . -name "build" -type d
+        echo ""
+        echo "=== 检查gradle输出目录 ==="
+        ls -la ~/.gradle/caches/ || echo "Gradle缓存目录不存在"
+    
+    - name: 上传APK（如果找到）
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-app
+        path: build/outputs/apk/debug/*.apk
+        if-no-files-found: ignore

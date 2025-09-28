@@ -12,19 +12,8 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
-    - name: 删除有问题的gradle文件
+    - name: 使用指定版本的Gradle
       run: |
-        rm -f gradlew
-        rm -f gradle/wrapper/gradle-wrapper.jar
-    
-    - name: 使用系统Gradle构建
-      run: |
-        # 使用系统安装的Gradle，跳过wrapper
-        gradle clean
-        gradle assembleDebug --stacktrace
-    
-    - name: 上传APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-app
-        path: build/outputs/apk/debug/*.apk
+        # 使用与项目兼容的Gradle版本
+        gradle --version
+        gradle clean assembleDebug --stacktrace --warning-mode none

@@ -1,44 +1,21 @@
 name: Android Build
-
-on: [push, pull_request]
-
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
-        
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-      
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon
-      
-    - name: 🔍 查找APK文件位置
+    - uses: android-actions/setup-android@v2
+    - name: 构建APK
       run: |
-          echo "=== 查找所有APK文件 ==="
-          find . -name "*.apk" -type f
-          echo ""
-          echo "=== 检查build目录 ==="
-          ls -la build/outputs/apk/ 2>/dev/null || echo "build目录不存在"
-          echo ""
-          echo "=== 检查app目录 ==="
-          ls -la app/build/outputs/apk/ 2>/dev/null || echo "app目录不存在"
-      
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
+        chmod +x ./gradlew
+        ./gradlew assembleDebug
+    - name: 上传APK
+      uses: actions/upload-artifact@v3
       with:
-        name: game-apk
+        name: app
         path: build/outputs/apk/debug/*.apk
-        if-no-files-found: error

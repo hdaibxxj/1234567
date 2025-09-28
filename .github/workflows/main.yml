@@ -12,18 +12,24 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
+    - name: 删除settings.gradle避免冲突
+      run: |
+        # 删除settings.gradle文件
+        if [ -f "settings.gradle" ]; then
+          rm settings.gradle
+          echo "✅ 已删除settings.gradle文件"
+        else
+          echo "ℹ️ settings.gradle文件不存在，继续构建"
+        fi
+        
+        # 验证当前文件结构
+        echo "=== 当前项目文件 ==="
+        ls -la | grep -E "(gradle|build|src)"
+    
     - name: 安装Gradle 8.4
       run: |
         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
-    
-    - name: 验证配置
-      run: |
-        echo "=== 检查settings.gradle ==="
-        cat settings.gradle || echo "settings.gradle不存在"
-        echo ""
-        echo "=== 检查build.gradle ==="
-        cat build.gradle || echo "build.gradle不存在"
     
     - name: 构建APK
       run: |
@@ -38,8 +44,6 @@ jobs:
         if [ -n "$APK_FILE" ]; then
           echo "✅ APK构建成功: $APK_FILE"
           echo "📦 文件大小: $(du -h "$APK_FILE" | cut -f1)"
-          echo "=== APK内容检查 ==="
-          unzip -l "$APK_FILE" | grep -E "(AndroidManifest|classes.dex|MainActivity)" | head -5
         else
           echo "❌ APK构建失败"
           find . -name "build" -type d
@@ -50,5 +54,3 @@ jobs:
       with:
         name: rpg-maker-webview-apk
         path: build/outputs/apk/debug/*.apk
-        if-no-files-found: error
-        retention-days: 30

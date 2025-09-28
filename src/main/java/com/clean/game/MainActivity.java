@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // 创建带进度条的布局
+        // 创建进度条布局
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         
@@ -54,7 +54,6 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                // 页面加载完成，隐藏进度条
                 progressBar.setVisibility(ProgressBar.GONE);
             }
             
@@ -67,7 +66,6 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                // 更新进度条
                 progressBar.setProgress(newProgress);
                 if (newProgress < 100) {
                     progressBar.setVisibility(ProgressBar.VISIBLE);
@@ -75,12 +73,7 @@ public class MainActivity extends Activity {
             }
         });
         
-        // 加载你的游戏
-        loadGame();
-    }
-    
-    private void loadGame() {
-        // 使用Netlify托管的游戏链接
+        // 从Netlify加载游戏
         String gameUrl = "https://nimble-nasturtium-44b0fd.netlify.app/";
         webView.loadUrl(gameUrl);
     }

@@ -1,11 +1,10 @@
-// 最简单的稳定配置
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'  // 使用更稳定的版本
+        classpath 'com.android.tools.build:gradle:8.1.0'  // 与Gradle 8.4兼容
     }
 }
 
@@ -20,6 +19,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 33
+    namespace 'com.clean.game'
     
     defaultConfig {
         applicationId "com.clean.game"
@@ -32,6 +32,7 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
+            debuggable true
         }
     }
     

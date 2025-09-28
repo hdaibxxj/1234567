@@ -19,6 +19,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 33
+    namespace 'com.clean.game'
     
     defaultConfig {
         applicationId "com.clean.game"
@@ -35,8 +36,10 @@ android {
         }
     }
     
-    // 移除namespace声明，使用package属性
-    // namespace 'com.clean.game'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 }
 
 dependencies {

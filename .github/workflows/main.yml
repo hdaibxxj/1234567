@@ -1,4 +1,4 @@
-name: Android Build
+name: RPG Maker WebView APK Build
 on: [push]
 jobs:
   build:
@@ -12,33 +12,58 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
-    - name: 安装Gradle 8.4
+    - name: 安装兼容的Gradle版本
       run: |
-        wget https://services.gradle.org/distributions/gradle-8.4-bin.zip
-        sudo unzip -d /opt/gradle gradle-8.4-bin.zip
+        wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
+        sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
+        echo "Gradle 8.4 安装完成"
     
-    - name: 构建APK
+    - name: 验证项目结构
       run: |
         export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
-        gradle clean assembleDebug --info
+        echo "=== 项目结构验证 ==="
+        echo "Assets目录:"
+        ls -la assets/ || echo "Assets目录不存在"
+        echo ""
+        echo "WWW游戏目录:"
+        ls -la assets/www/ || echo "WWW目录不存在"
+        echo ""
+        echo "主入口文件:"
+        cat assets/www/index.html || echo "index.html不存在"
+        echo ""
+        echo "Java源代码:"
+        find src -name "*.java" -type f
+        echo ""
+        echo "Gradle配置:"
+        cat build.gradle || echo "build.gradle不存在"
     
-    - name: 🔍 详细检查文件结构
+    - name: 构建RPG Maker WebView APK
       run: |
-        echo "=== 当前目录所有文件 ==="
-        ls -la
-        echo ""
-        echo "=== 查找所有apk文件 ==="
-        find . -name "*.apk" -type f
-        echo ""
-        echo "=== 查找build目录 ==="
-        find . -name "build" -type d
-        echo ""
-        echo "=== 检查gradle输出目录 ==="
-        ls -la ~/.gradle/caches/ || echo "Gradle缓存目录不存在"
+        export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
+        echo "开始构建APK..."
+        gradle clean assembleDebug --stacktrace --info
+        echo "构建完成!"
     
-    - name: 上传APK（如果找到）
+    - name: 检查生成的APK
+      run: |
+        echo "=== 查找APK文件 ==="
+        find . -name "*.apk" -type f -exec ls -la {} \;
+        echo ""
+        echo "=== APK文件详情 ==="
+        APK_FILE=$(find . -name "*.apk" -type f | head -1)
+        if [ -n "$APK_FILE" ]; then
+          echo "APK文件: $APK_FILE"
+          echo "文件大小: $(du -h "$APK_FILE" | cut -f1)"
+          echo "APK内容预览:"
+          unzip -l "$APK_FILE" | head -20
+        else
+          echo "未找到APK文件"
+        fi
+    
+    - name: 上传APK文件
       uses: actions/upload-artifact@v4
       with:
-        name: android-app
+        name: rpg-maker-game-apk
         path: build/outputs/apk/debug/*.apk
-        if-no-files-found: ignore
+        if-no-files-found: error
+        retention-days: 30

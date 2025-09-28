@@ -12,37 +12,59 @@ jobs:
     - name: 设置Android SDK
       uses: android-actions/setup-android@v2
     
+    - name: 创建gradle.properties启用AndroidX
+      run: |
+        echo "创建gradle.properties文件..."
+        cat > gradle.properties << 'EOF'
+        android.useAndroidX=true
+        android.enableJetifier=true
+        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+        EOF
+        echo "✅ gradle.properties内容:"
+        cat gradle.properties
+    
     - name: 安装Gradle 8.4
       run: |
         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
     
-    - name: 构建APK
+    - name: 验证项目配置
+      run: |
+        echo "=== 项目文件检查 ==="
+        ls -la
+        echo ""
+        echo "=== gradle.properties内容 ==="
+        cat gradle.properties
+        echo ""
+        echo "=== build.gradle内容 ==="
+        cat build.gradle
+    
+    - name: 使用Gradle 8.4构建APK
       run: |
         export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
         echo "开始构建APK..."
         gradle clean assembleDebug --stacktrace --no-daemon
         echo "构建完成!"
     
-    - name: 详细检查构建输出
+    - name: 检查构建结果
       run: |
-        echo "=== 查找所有APK文件 ==="
-        find . -name "*.apk" -type f
-        echo ""
-        echo "=== 检查build目录结构 ==="
-        find build -type f 2>/dev/null | head -20 || echo "build目录不存在"
-        echo ""
-        echo "=== 检查项目根目录 ==="
-        ls -la
-        echo ""
-        echo "=== 检查是否有app目录 ==="
-        ls -la app/ 2>/dev/null | head -10 || echo "app目录不存在"
+        APK_FILE=$(find . -name "*.apk" -type f | head -1)
+        if [ -n "$APK_FILE" ]; then
+          echo "🎉 恭喜！APK构建成功！"
+          echo "📦 APK文件: $APK_FILE"
+          echo "📏 文件大小: $(du -h "$APK_FILE" | cut -f1)"
+          echo "=== APK内容预览 ==="
+          unzip -l "$APK_FILE" | head -10
+        else
+          echo "❌ APK构建失败"
+          echo "=== 详细错误诊断 ==="
+          find . -name "build" -type d
+          ls -la build/outputs/ 2>/dev/null || echo "输出目录不存在"
+        fi
     
-    - name: 上传APK（如果找到）
+    - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
-        name: rpg-maker-apk
-        path: |
-          build/outputs/apk/debug/*.apk
-          app/build/outputs/apk/debug/*.apk
-        if-no-files-found: warn
+        name: rpg-maker-webview-apk
+        path: build/outputs/apk/debug/*.apk
+        if-no-files-found: error

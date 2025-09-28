@@ -17,29 +17,46 @@ jobs:
         wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip
         sudo unzip -q -d /opt/gradle gradle-8.4-bin.zip
     
-    - name: 修复配置
+    - name: 验证项目结构
       run: |
-        # 确保使用正确的主题配置
-        echo "修复AndroidManifest.xml主题配置..."
+        echo "=== 项目文件检查 ==="
+        ls -la
+        echo ""
+        echo "=== Java文件检查 ==="
+        find src -name "*.java" -type f
+        echo ""
+        echo "=== 配置文件检查 ==="
+        cat build.gradle || echo "build.gradle不存在"
+        echo "---"
+        cat AndroidManifest.xml || echo "AndroidManifest.xml不存在"
     
     - name: 构建APK
       run: |
         export PATH="/opt/gradle/gradle-8.4/bin:$PATH"
+        echo "开始构建APK..."
         gradle clean assembleDebug --stacktrace
+        echo "构建完成!"
     
-    - name: 检查APK
+    - name: 检查构建结果
       run: |
+        echo "=== 查找APK文件 ==="
+        find . -name "*.apk" -type f
+        echo ""
+        echo "=== 检查build目录 ==="
+        ls -la build/outputs/apk/debug/ || echo "APK目录不存在"
+        echo ""
         APK_FILE=$(find . -name "*.apk" -type f | head -1)
         if [ -n "$APK_FILE" ]; then
-          echo "APK文件: $APK_FILE"
-          echo "大小: $(du -h "$APK_FILE" | cut -f1)"
+          echo "✅ APK构建成功: $APK_FILE"
+          echo "📦 文件大小: $(du -h "$APK_FILE" | cut -f1)"
         else
-          echo "未找到APK文件"
-          find . -name "build" -type d
+          echo "❌ APK构建失败"
         fi
     
     - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
-        name: rpg-game-apk
+        name: rpg-maker-webview-apk
         path: build/outputs/apk/debug/*.apk
+        if-no-files-found: error
+        retention-days: 30
